@@ -1,41 +1,21 @@
 package com.spring.boot.webflux.security.app.handler;
-
-import com.spring.boot.webflux.security.app.dto.auth.AuthenticationRequest;
-import com.spring.boot.webflux.security.app.dto.auth.AuthenticationResponse;
-import com.spring.boot.webflux.security.app.dto.buscar;
 import com.spring.boot.webflux.security.app.exception.ObjectNotFoundException;
 import com.spring.boot.webflux.security.app.persistence.documents.ReqLogin;
-import com.spring.boot.webflux.security.app.persistence.documents.Users;
-import com.spring.boot.webflux.security.app.persistence.repository.UserRepository;
 import com.spring.boot.webflux.security.app.service.UserService;
 import com.spring.boot.webflux.security.app.service.auth.AuthenticationService;
 import com.spring.boot.webflux.security.app.service.auth.JwtService;
 import com.spring.boot.webflux.security.app.service.imp.ReqRespModel;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Mono;
 
-import java.util.Collection;
 
 @Component
 public class AuthenticationHandler {
-    @Autowired
-    private AuthenticationService authenticationService;
-    @Autowired
-    private UserService userRepository;
-
     @Autowired
     private ReactiveUserDetailsService users;
     @Autowired
