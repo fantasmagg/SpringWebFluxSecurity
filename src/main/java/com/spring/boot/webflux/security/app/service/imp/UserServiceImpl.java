@@ -43,26 +43,54 @@ public class UserServiceImpl implements UserService {
                 .switchIfEmpty(Mono.error(new ObjectNotFoundException("a ocurrido un error")));
     }
 
+//    @Override
+//    public Mono<Users> findOneByUsername(String username) {
+//        Mono<Users> ss = userRepository.findByUsername(username)
+//                .flatMap(user -> {
+//                    System.out.println("User found: " + user.getName());
+//                    return Mono.just(user);
+//                })
+//                .switchIfEmpty(Mono.error(new RuntimeException("User not found")));
+//
+//        // Aquí suscribimos al Mono para imprimir el resultado o el error
+//        ss.subscribe(
+//                user -> System.out.println("Subscription result: " + user.getName()),
+//                error -> System.out.println("Subscription error: " + error.getMessage())
+//        );
+//
+//        return ss;
+//    }
+
     @Override
     public Mono<Users> findOneByUsername(String username) {
         return userRepository.findByUsername(username)
-                .switchIfEmpty(Mono.error(new ObjectNotFoundException("usurio no encontrado")));
+                .flatMap(user -> {
+                    System.out.println("User found: " + user.getName());
+                    return Mono.just(user);
+                })
+                .switchIfEmpty(Mono.error(new RuntimeException("User not found")));
     }
 
-    @Bean
-    public ReactiveUserDetailsService reactiveUserDetailsService() {
-        return new ReactiveUserDetailsService() {
-            @Override
-            public Mono<UserDetails> findByUsername(String username) {
-                return findOneByUsername(username)
-                        .map(user -> User.builder()
-                                .username(username)
-                                .password(user.getPassword()) // Asume que la contraseña ya está codificada
-                                .roles(user.getRole().name()) // Ajusta según cómo almacenes roles
-                                .build());
-            }
-        };
-    }
+
+//    @Bean
+//    public ReactiveUserDetailsService reactiveUserDetailsService() {
+//        return username -> userRepository.findByUsername(username)
+//                .map(user -> User.withUsername(user.getUsername())
+//                        .password(user.getPassword()) // Asegúrate de que la contraseña esté codificada
+//                        .roles(user.getRole().name())
+//                        .build());
+//    }
+
+//    @Bean
+//    public ReactiveUserDetailsService reactiveUserDetailsService(String username) {
+//
+//        return (ReactiveUserDetailsService) userRepository.findByUsername(username)
+//                .map(user -> User.withUsername(user.getUsername())
+//                        .password(user.getPassword())
+//                        .roles(user.getRole().name())
+//                        .build());
+//
+//    }
 
     //aqui lo que estamos hhaciendo es validar el password
     private void validatePassword(SaveUser dto){
