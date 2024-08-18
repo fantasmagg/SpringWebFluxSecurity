@@ -70,6 +70,7 @@ public class SecurityBeansInjector {
         return http.
                 authorizeExchange(auth -> {
                     auth.pathMatchers("/auth/authenticate").permitAll();
+                    auth.pathMatchers("/api/v1/customers").permitAll();
                     auth.anyExchange().authenticated();
                 })
                 .addFilterAt(jwtFilter, SecurityWebFiltersOrder.AUTHORIZATION)

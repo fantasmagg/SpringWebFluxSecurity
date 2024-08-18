@@ -12,6 +12,7 @@ import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Map;
 
 @Service
 public class JwtService {
@@ -31,8 +32,9 @@ public class JwtService {
         return Decoders.BASE64.decode(SECRET_KEY);
     }
 
-    public String generate (String username){
+    public String generate (String username, Map<String, Object> extraClaims){
         JwtBuilder builder = Jwts.builder()
+                .setClaims(extraClaims)
                 .setSubject(username)
                 .setIssuedAt(Date.from(Instant.now()))
                 .setExpiration(Date.from(Instant.now().plus(15, ChronoUnit.MINUTES)))

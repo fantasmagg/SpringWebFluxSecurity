@@ -16,12 +16,15 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class AuthenticationHandler {
-    @Autowired
-    private ReactiveUserDetailsService users;
+//    @Autowired
+//    private ReactiveUserDetailsService users;
     @Autowired
     private JwtService jwtService;
+//    @Autowired
+//    private PasswordEncoder encoder;
+
     @Autowired
-    private PasswordEncoder encoder;
+    private AuthenticationService authenticationService;
 
 //    public Mono<ServerResponse> authenticate (ServerRequest request){
 //        Mono<AuthenticationRequest> authresp = request.bodyToMono(AuthenticationRequest.class);
@@ -107,20 +110,7 @@ public class AuthenticationHandler {
 
     public Mono<ServerResponse> login(ServerRequest request) {
         return request.bodyToMono(ReqLogin.class)
-                .flatMap(user ->
-                        users.findByUsername(user.getEmail())
-                                .switchIfEmpty(Mono.error(new ObjectNotFoundException("User not found with username " + user.getEmail())))
-                                .flatMap(foundUser -> {
-                                    // Aquí se asume que `foundUser` es un objeto que implementa `UserDetails`
-                                    if (encoder.matches(user.getPassword(), foundUser.getPassword())) {
-                                        String token = jwtService.generate(foundUser.getUsername());
-                                        ReqRespModel<String> response = new ReqRespModel<>(token, "Success");
-                                        return ServerResponse.ok().bodyValue(response);
-                                    } else {
-                                        return ServerResponse.badRequest().bodyValue(new ReqRespModel<>("","Invalid credentials"));
-                                    }
-                                })
-                )
+                .flatMap(user ->authenticationService.reactUserDetail(user))
                 .onErrorResume(e -> {
                     if (e instanceof ObjectNotFoundException) {
                         return ServerResponse.status(404).bodyValue(new ReqRespModel<>("","User not found"));
@@ -129,4 +119,29 @@ public class AuthenticationHandler {
                     }
                 });
     }
+
+//    public Mono<ServerResponse> login(ServerRequest request) {
+//        return request.bodyToMono(ReqLogin.class)
+//                .flatMap(user ->
+//                        users.findByUsername(user.getEmail())
+//                                .switchIfEmpty(Mono.error(new ObjectNotFoundException("User not found with username " + user.getEmail())))
+//                                .flatMap(foundUser -> {
+//                                    // Aquí se asume que `foundUser` es un objeto que implementa `UserDetails`
+//                                    if (encoder.matches(user.getPassword(), foundUser.getPassword())) {
+//                                        String token = jwtService.generate(foundUser.getUsername());
+//                                        ReqRespModel<String> response = new ReqRespModel<>(token, "Success");
+//                                        return ServerResponse.ok().bodyValue(response);
+//                                    } else {
+//                                        return ServerResponse.badRequest().bodyValue(new ReqRespModel<>("","Invalid credentials"));
+//                                    }
+//                                })
+//                )
+//                .onErrorResume(e -> {
+//                    if (e instanceof ObjectNotFoundException) {
+//                        return ServerResponse.status(404).bodyValue(new ReqRespModel<>("","User not found"));
+//                    } else {
+//                        return ServerResponse.status(500).bodyValue(new ReqRespModel<>("","An unexpected error occurred"));
+//                    }
+//                });
+//    }
 }

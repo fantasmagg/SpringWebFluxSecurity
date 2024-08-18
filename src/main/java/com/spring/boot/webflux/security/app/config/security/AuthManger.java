@@ -1,6 +1,7 @@
 package com.spring.boot.webflux.security.app.config.security;
 
 import com.spring.boot.webflux.security.app.exception.ObjectNotFoundException;
+import com.spring.boot.webflux.security.app.persistence.documents.Users;
 import com.spring.boot.webflux.security.app.service.auth.JwtService;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,42 +58,7 @@ public class AuthManger implements ReactiveAuthenticationManager {
                 .cast(BearerToken.class)
                 .flatMap(auth -> {
                     String getUserName = jwtService.getUserName(auth.getCredentials());
-                    Mono<UserDetails> foundUser= users.findByUsername(getUserName).defaultIfEmpty(new UserDetails() {
-                        @Override
-                        public Collection<? extends GrantedAuthority> getAuthorities() {
-                            return List.of();
-                        }
-
-                        @Override
-                        public String getPassword() {
-                            return "";
-                        }
-
-                        @Override
-                        public String getUsername() {
-                            return "";
-                        }
-
-                        @Override
-                        public boolean isAccountNonExpired() {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean isAccountNonLocked() {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean isCredentialsNonExpired() {
-                            return false;
-                        }
-
-                        @Override
-                        public boolean isEnabled() {
-                            return false;
-                        }
-                    });
+                    Mono<UserDetails> foundUser= users.findByUsername(getUserName).defaultIfEmpty(new Users());
 
                     Mono<Authentication> authenticatedUser = foundUser.flatMap(u->{
                         if (u.getUsername()==null){
@@ -108,4 +74,64 @@ public class AuthManger implements ReactiveAuthenticationManager {
                 });
 
     }
+
+//    @Override
+//    public Mono<Authentication> authenticate(Authentication authentication) {
+//        return Mono.justOrEmpty(
+//                        authentication
+//                )
+//                .cast(BearerToken.class)
+//                .flatMap(auth -> {
+//                    String getUserName = jwtService.getUserName(auth.getCredentials());
+//                    Mono<UserDetails> foundUser= users.findByUsername(getUserName).defaultIfEmpty(new UserDetails() {
+//                        @Override
+//                        public Collection<? extends GrantedAuthority> getAuthorities() {
+//                            return List.of();
+//                        }
+//
+//                        @Override
+//                        public String getPassword() {
+//                            return "";
+//                        }
+//
+//                        @Override
+//                        public String getUsername() {
+//                            return "";
+//                        }
+//
+//                        @Override
+//                        public boolean isAccountNonExpired() {
+//                            return false;
+//                        }
+//
+//                        @Override
+//                        public boolean isAccountNonLocked() {
+//                            return false;
+//                        }
+//
+//                        @Override
+//                        public boolean isCredentialsNonExpired() {
+//                            return false;
+//                        }
+//
+//                        @Override
+//                        public boolean isEnabled() {
+//                            return false;
+//                        }
+//                    });
+//
+//                    Mono<Authentication> authenticatedUser = foundUser.flatMap(u->{
+//                        if (u.getUsername()==null){
+//                            Mono.error(new IllegalArgumentException("user not found"));
+//                        }
+//                        if(jwtService.validate(u, auth.getCredentials())){
+//                            return Mono.justOrEmpty(new UsernamePasswordAuthenticationToken(u.getUsername(),u.getPassword(),u.getAuthorities()));
+//                        }
+//                        Mono.error(new IllegalArgumentException("invalid expired token"));
+//                        return Mono.justOrEmpty(new UsernamePasswordAuthenticationToken(u.getUsername(),u.getPassword(),u.getAuthorities()));
+//                    });
+//                    return authenticatedUser;
+//                });
+//
+//    }
 }
